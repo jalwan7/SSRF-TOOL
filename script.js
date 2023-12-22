@@ -1,3 +1,70 @@
+// Function to animate the button visibility
+function animateButtons() {
+  const buttons = document.querySelectorAll('#controls button');
+  buttons.forEach((button, index) => {
+    setTimeout(() => {
+      button.classList.add('animate__animated', 'animate__fadeIn');
+    }, index * 100);
+  });
+}
+
+// Function to copy logs to the clipboard
+function copyLogs() {
+  const logsContainer = document.getElementById('logs');
+  const logsText = logsContainer.innerText;
+
+  // Create a temporary textarea to copy text
+  const textarea = document.createElement('textarea');
+  textarea.value = logsText;
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand('copy');
+  document.body.removeChild(textarea);
+
+  // Show custom popup
+  showPopup('Logs copied to clipboard!');
+}
+
+// Copy logs button event listener
+const copyLogsButton = document.getElementById('copyLogs');
+copyLogsButton.addEventListener('click', () => {
+  copyLogs();
+});
+
+// Auto Refresh Interval ID
+let autoRefreshIntervalId;
+
+// Previous log entry for auto-refresh comparison
+let previousAutoRefreshLog = '';
+
+// Toggle Auto Refresh
+function toggleAutoRefresh() {
+  const autoRefreshButton = document.getElementById('autoRefreshToggle');
+  if (autoRefreshButton.classList.contains('active')) {
+    clearInterval(autoRefreshIntervalId);
+    autoRefreshButton.textContent = 'Auto Refresh: OFF';
+  } else {
+    autoRefreshIntervalId = setInterval(() => {
+      // Simulate log entry on auto-refresh only if there's a significant change
+      const currentLog = `Auto Refreshed Log: ${new Date().toLocaleString()}`;
+      if (currentLog !== previousAutoRefreshLog) {
+        addLogEntry(currentLog);
+        previousAutoRefreshLog = currentLog;
+      }
+    }, 5000); // Auto-refresh every 5 seconds (adjust as needed)
+    autoRefreshButton.textContent = 'Auto Refresh: ON';
+  }
+  autoRefreshButton.classList.toggle('active');
+}
+
+// Auto Refresh button event listener
+const autoRefreshButton = document.getElementById('autoRefreshToggle');
+autoRefreshButton.addEventListener('click', toggleAutoRefresh);
+
+// Animate buttons on page load
+animateButtons();
+
+// ... (Your existing JavaScript code remains unchanged)
 // Function to add a log entry
 function addLogEntry(log) {
   const logsContainer = document.getElementById('logs');
@@ -107,3 +174,35 @@ window.addEventListener('load', retrieveLogsFromLocalStorage);
 
 // Log visit when the page is loaded
 logVisit();
+// Updated function to add a log entry with animation
+function addLogEntry(log) {
+  const logsContainer = document.getElementById('logs');
+  const logEntry = document.createElement('li');
+  logEntry.textContent = log;
+  logEntry.classList.add('animate__animated', 'animate__fadeIn');
+  logsContainer.insertBefore(logEntry, logsContainer.firstChild);
+
+  // Limit to maximum 10 logs
+  if (logsContainer.children.length > 10) {
+    logsContainer.lastChild.remove();
+  }
+
+  // Check if log contains "IP" and show an alert
+  if (log.includes('IP')) {
+    showPopup('IP Log Detected!');
+  }
+
+  saveLogsToLocalStorage();
+}
+
+// Function to show a popup message
+function showPopup(message) {
+  const popup = document.createElement('div');
+  popup.classList.add('popup');
+  popup.textContent = message;
+  document.body.appendChild(popup);
+
+  setTimeout(() => {
+    popup.style.display = 'none';
+  }, 3000);
+}
